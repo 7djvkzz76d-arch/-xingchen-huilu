@@ -1,5 +1,5 @@
 import fs from 'node:fs';import {execFileSync} from 'node:child_process';
-const html=fs.readFileSync('index.html','utf8'),js=fs.readFileSync('game.js','utf8'),manifest=fs.readFileSync('manifest.webmanifest','utf8'),all=html+'\n'+js+'\n'+manifest;
+const html=fs.readFileSync('index.html','utf8'),js=fs.readFileSync('game.js','utf8'),manifest=fs.readFileSync('manifest.webmanifest','utf8'),cg=fs.readFileSync('platforms/crazygames/index.html','utf8'),all=html+'\n'+js+'\n'+manifest+'\n'+cg;
 execFileSync(process.execPath,['--check','game.js']);
 const must=[
   ['viewport',/name="viewport"/],
@@ -23,7 +23,7 @@ const must=[
 ];
 for(const [n,re] of must)if(!re.test(all))throw new Error('QA failed: '+n);
 if(!/<svg\s+xmlns=/.test(fs.readFileSync('icon.svg','utf8')))throw new Error('QA failed: icon');
-if(/sdk\.crazygames|poki/i.test(all))throw new Error('QA failed: unexpected SDK residue');
+if(/sdk\.crazygames|poki/i.test(html+'\n'+js+'\n'+manifest))throw new Error('QA failed: unexpected SDK residue in public build');
 if(/12\s*关|12\s*levels/i.test(fs.readFileSync('README.md','utf8')))throw new Error('QA failed: 12-level residue');
 if(/state\.level===3\)state\.level=1/.test(js))throw new Error('QA failed: obsolete level-3 loop');
 if(/normal play loops|正常播放.*循环/i.test(fs.readFileSync('README.md','utf8')))throw new Error('QA failed: stale README');
