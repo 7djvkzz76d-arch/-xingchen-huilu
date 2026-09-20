@@ -19,4 +19,35 @@ if(/sdk\.crazygames|poki/i.test(all))throw new Error('QA failed: unexpected SDK 
 if(/12\s*关|12\s*levels/i.test(fs.readFileSync('README.md','utf8')))throw new Error('QA failed: 12-level residue');
 if(/state\.level===3\)state\.level=1/.test(js))throw new Error('QA failed: obsolete level-3 loop');
 if(/normal play loops|正常播放.*循环/i.test(fs.readFileSync('README.md','utf8')))throw new Error('QA failed: stale README');
-console.log('All static QA checks passed.');
+
+const layouts={
+  1:[[0,0,0,1,1,2],[1,1,1,2,2,3],[2,2,2,3,3,4]],
+  2:[[0,0,0,1,1,2,2,3],[1,1,1,2,2,3,3,4],[2,2,2,3,3,4,4,5]],
+  3:[[0,0,0,1,1,1,2,2,3,3,4,4],[1,1,1,2,2,2,3,3,4,4,5,5],[2,2,2,3,3,3,4,4,5,5,0,0]]
+};
+function solvable(level){
+  const layers=layouts[level],stacks=layers[0].length,values=layers.flat(),full=(1<<(stacks*3))-1,memo=new Map();
+  function dfs(gone,hand){
+    if(gone===full)return true;
+    const key=gone+'|'+hand;
+    if(memo.has(key))return memo.get(key);
+    const available=[];
+    for(let s=0;s<stacks;s++){
+      for(let layer=2;layer>=0;layer--){
+        const id=layer*stacks+s;
+        if(!(gone&(1<<id))){available.push(id);break;}
+      }
+    }
+    for(const id of available){
+      const v=values[id],counts=hand.split('').map(Number);
+      counts[v]=(counts[v]||0)+1;
+      let next='';
+      for(let x=0;x<counts.length;x++)if(counts[x]%3)next+=String(x).repeat(counts[x]%3);
+      if(next.length<7&&dfs(gone|(1<<id),next)){memo.set(key,true);return true;}
+    }
+    memo.set(key,false);return false;
+  }
+  return dfs(0,'');
+}
+for(const level of [1,2,3])if(!solvable(level))throw new Error('QA failed: level '+level+' has no verified solution path');
+console.log('All static QA checks passed, including solvability paths.');
