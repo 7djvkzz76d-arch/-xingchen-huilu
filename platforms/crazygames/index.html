@@ -9,7 +9,7 @@
 <script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;background:#050b15;color:#e8f3ff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+html,body{margin:0;background:#050b15;color:#e8f3ff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
 body{min-height:100dvh;overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
 button{font:inherit;color:#eef7ff}
 .app{width:min(100%,520px);min-height:100dvh;margin:auto;padding:max(10px,env(safe-area-inset-top)) 12px max(10px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
@@ -42,7 +42,8 @@ dialog{border:1px solid #35516e;border-radius:18px;background:#122238;color:#eef
 (async()=>{
   try{
     await window.CrazyGames.SDK.init();
-    window.CrazyGames.SDK.game.loadingStop();
+    const locale=window.CrazyGames.SDK.user?.systemInfo?.locale||navigator.language||'en-US';
+    window.XingchenHuilu?.setLocale(locale);
     window.CrazyGames.SDK.game.gameplayStart();
   }catch(e){
     console.warn('CrazyGames SDK unavailable',e);
