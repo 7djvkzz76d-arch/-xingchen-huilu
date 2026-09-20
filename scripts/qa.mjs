@@ -14,7 +14,9 @@ const must=[
   ['finish-message',/通关成功/],
   ['gone-click-block',/pointer-events:none/],
   ['manifest',/manifest\.webmanifest/],
-  ['accessible-actions',/aria-label="撤回上一步"/]
+  ['accessible-actions',/aria-label="撤回上一步"/],
+  ['share-action',/id="share"/],
+  ['share-handler',/function shareResult\(\)/]
 ];
 for(const [n,re] of must)if(!re.test(all))throw new Error('QA failed: '+n);
 if(!/<svg\s+xmlns=/.test(fs.readFileSync('icon.svg','utf8')))throw new Error('QA failed: icon');
