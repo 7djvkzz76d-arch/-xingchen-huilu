@@ -25,29 +25,32 @@ const layouts={
   2:[[0,0,0,1,1,2,2,3],[1,1,1,2,2,3,3,4],[2,2,2,3,3,4,4,5]],
   3:[[0,0,0,1,1,1,2,2,3,3,4,4],[1,1,1,2,2,2,3,3,4,4,5,5],[2,2,2,3,3,3,4,4,5,5,0,0]]
 };
-function solvable(level){
-  const layers=layouts[level],stacks=layers[0].length,values=layers.flat(),full=(1<<(stacks*3))-1,memo=new Map();
-  function dfs(gone,counts){
-    if(gone===full)return true;
-    const key=gone+'|'+counts.join(',');
-    if(memo.has(key))return memo.get(key);
-    const available=[];
-    for(let s=0;s<stacks;s++){
-      for(let layer=2;layer>=0;layer--){
-        const id=layer*stacks+s;
-        if(!(gone&(1<<id))){available.push(id);break;}
-      }
+const solutionPaths={
+  1:[17,16,15,11,14,13,12,10,9,5,8,7,6,4,3,2,1,0],
+  2:[23,22,21,15,20,19,14,18,17,16,13,12,11,6,10,9,8,7,5,2,1,0,4,3],
+  3:[35,34,33,32,23,31,30,21,29,28,27,26,25,24,22,20,19,18,9,17,16,15,14,2,13,12,11,10,8,7,6,5,4,3,1,0]
+};
+const layouts={
+  1:[[0,0,0,1,1,2],[1,1,1,2,2,3],[2,2,2,3,3,4]],
+  2:[[0,0,0,1,1,2,2,3],[1,1,1,2,2,3,3,4],[2,2,2,3,3,4,4,5]],
+  3:[[0,0,0,1,1,1,2,2,3,3,4,4],[1,1,1,2,2,2,3,3,4,4,5,5],[2,2,2,3,3,3,4,4,5,5,0,0]]
+};
+function verifySolution(level){
+  const layers=layouts[level],stacks=layers[0].length,values=layers.flat(),path=solutionPaths[level];
+  const gone=new Set(),counts=Array(6).fill(0);
+  for(const id of path){
+    if(gone.has(id))return false;
+    const stack=id%stacks,layer=Math.floor(id/stacks);
+    for(let higher=layer+1;higher<3;higher++){
+      if(!gone.has(higher*stacks+stack))return false;
     }
-    for(const id of available){
-      const v=values[id],next=counts.slice();
-      next[v]++;
-      if(next[v]>=3)next[v]-=3;
-      const handSize=next.reduce((a,b)=>a+b,0);
-      if(handSize<7&&dfs(gone|(1<<id),next)){memo.set(key,true);return true;}
-    }
-    memo.set(key,false);return false;
+    gone.add(id);
+    const v=values[id];
+    counts[v]++;
+    if(counts[v]===3)counts[v]=0;
+    if(counts.reduce((a,b)=>a+b,0)>=7)return false;
   }
-  return dfs(0,Array(6).fill(0));
+  return gone.size===values.length;
 }
-for(const level of [1,2,3])if(!solvable(level))throw new Error('QA failed: level '+level+' has no verified solution path');
-console.log('All static QA checks passed, including solvability paths.');
+for(const level of [1,2,3])if(!verifySolution(level))throw new Error('QA failed: no verified solution path for level '+level);
+console.log('All static QA checks passed, including verified solvability paths.');
