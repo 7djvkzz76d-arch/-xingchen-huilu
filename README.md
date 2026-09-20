@@ -4,7 +4,7 @@ Mobile-first original casual puzzle game.
 
 - Exactly 3 levels: 入门 / 深思 / 1% 极限
 - Level 3 is a difficulty target, not a claimed measured 1% completion rate.
-- After level 3, normal play loops to level 1.
+- **Level 3 is the final level. Completing it ends the run with a success celebration.**
 - Public web build has no third-party ad SDK dependency.
 - Static-hosting ready.
 
