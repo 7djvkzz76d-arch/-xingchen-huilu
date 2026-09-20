@@ -58,7 +58,7 @@ function build(){
     for(let layer=0;layer<3;layer++){
       const id=layer*cfg.stacks+i;
       const tile={id,stack:i,layer,v:values[id]};
-      state.tiles.push(tile);
+      state.tiles[id]=tile;
       const b=document.createElement('button');
       b.className='tile';
       b.textContent=ICONS[tile.v];
