@@ -16,7 +16,10 @@ const must=[
   ['manifest',/manifest\.webmanifest/],
   ['accessible-actions',/aria-label="撤回上一步"/],
   ['share-action',/id="share"/],
-  ['share-handler',/function shareResult\(\)/]
+  ['share-handler',/function shareResult\(\)/],
+  ['touch-delegation',/\$\('#field'\)\.addEventListener\('click'/],
+  ['large-touch-target',/width:clamp\(64px,18vw,82px\)/],
+  ['level3-mobile-columns',/3:\{stacks:12,cols:3\}/]
 ];
 for(const [n,re] of must)if(!re.test(all))throw new Error('QA failed: '+n);
 if(!/<svg\s+xmlns=/.test(fs.readFileSync('icon.svg','utf8')))throw new Error('QA failed: icon');
@@ -48,7 +51,9 @@ function verifySolution(level){
     gone.add(id);
     const v=values[id];
     counts[v]++;
-    if(counts[v]===3)counts[v]=0;
+    if(counts[v]>=3){
+      for(let j=0;j<counts.length;j++)counts[j]=j===v?0:counts[j];
+    }
     if(counts.reduce((a,b)=>a+b,0)>=7)return false;
   }
   return gone.size===values.length && counts.every(n=>n===0);
