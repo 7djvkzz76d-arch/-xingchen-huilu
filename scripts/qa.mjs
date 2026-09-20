@@ -27,9 +27,9 @@ const layouts={
 };
 function solvable(level){
   const layers=layouts[level],stacks=layers[0].length,values=layers.flat(),full=(1<<(stacks*3))-1,memo=new Map();
-  function dfs(gone,hand){
+  function dfs(gone,counts){
     if(gone===full)return true;
-    const key=gone+'|'+hand;
+    const key=gone+'|'+counts.join(',');
     if(memo.has(key))return memo.get(key);
     const available=[];
     for(let s=0;s<stacks;s++){
@@ -39,15 +39,15 @@ function solvable(level){
       }
     }
     for(const id of available){
-      const v=values[id],counts=hand.split('').map(Number);
-      counts[v]=(counts[v]||0)+1;
-      let next='';
-      for(let x=0;x<counts.length;x++)if(counts[x]%3)next+=String(x).repeat(counts[x]%3);
-      if(next.length<7&&dfs(gone|(1<<id),next)){memo.set(key,true);return true;}
+      const v=values[id],next=counts.slice();
+      next[v]++;
+      if(next[v]>=3)next[v]-=3;
+      const handSize=next.reduce((a,b)=>a+b,0);
+      if(handSize<7&&dfs(gone|(1<<id),next)){memo.set(key,true);return true;}
     }
     memo.set(key,false);return false;
   }
-  return dfs(0,'');
+  return dfs(0,Array(6).fill(0));
 }
 for(const level of [1,2,3])if(!solvable(level))throw new Error('QA failed: level '+level+' has no verified solution path');
 console.log('All static QA checks passed, including solvability paths.');
