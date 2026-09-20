@@ -10,6 +10,8 @@ Mobile-first original casual puzzle game.
 - Public web build has no third-party ad SDK dependency.
 - Static-hosting ready.
 
+Production integration verified via Vercel Git deployment trigger.
+
 ## QA
 ```bash
 npm test
