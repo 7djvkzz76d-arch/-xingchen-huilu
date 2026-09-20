@@ -24,9 +24,9 @@ if(/state\.level===3\)state\.level=1/.test(js))throw new Error('QA failed: obsol
 if(/normal play loops|正常播放.*循环/i.test(fs.readFileSync('README.md','utf8')))throw new Error('QA failed: stale README');
 
 const layouts={
-  1:[[0,0,0,1,1,2],[1,1,1,2,2,3],[2,2,2,3,3,4]],
-  2:[[0,0,0,1,1,2,2,3],[1,1,1,2,2,3,3,4],[2,2,2,3,3,4,4,5]],
-  3:[[0,0,0,1,1,1,2,2,3,3,4,4],[1,1,1,2,2,2,3,3,4,4,5,5],[2,2,2,3,3,3,4,4,5,5,0,0]]
+  1:[[5,5,5,4,4,3],[4,3,3,2,2,1],[2,1,1,0,0,0]],
+  2:[[1,0,0,1,1,0,4,5],[5,5,4,4,3,3,2,1],[3,2,2,1,1,0,0,0]],
+  3:[[5,5,1,5,4,4,4,3,3,0,3,2],[2,2,1,1,0,0,5,5,5,2,4,1],[4,4,3,3,3,2,2,1,1,0,0,0]]
 };
 const solutionPaths={
   1:[17,16,15,11,14,13,12,10,9,5,8,7,6,4,3,2,1,0],
@@ -49,7 +49,7 @@ function verifySolution(level){
     if(counts[v]===3)counts[v]=0;
     if(counts.reduce((a,b)=>a+b,0)>=7)return false;
   }
-  return gone.size===values.length;
+  return gone.size===values.length && counts.every(n=>n===0);
 }
 for(const level of [1,2,3])if(!verifySolution(level))throw new Error('QA failed: no verified solution path for level '+level);
 console.log('All static QA checks passed, including verified solvability paths.');
