@@ -108,13 +108,12 @@ function pick(b){
   state.hand.push(tile.v);state.gone.add(id);
 
   let cleared=false;
-  for(const v of [...new Set(state.hand)]){
-    const kept=[];let count=0;
-    for(const x of state.hand){
-      if(x===v){count++;if(count%3===0){state.score+=30;cleared=true;continue}}
-      kept.push(x);
+  for(const v of new Set(state.hand)){
+    if(state.hand.filter(x=>x===v).length>=3){
+      state.hand=state.hand.filter(x=>x!==v);
+      state.score+=30;
+      cleared=true;
     }
-    state.hand=kept;
   }
   syncTiles();render();
 
