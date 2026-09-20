@@ -1,49 +1,135 @@
 'use strict';
+
 const ICONS=['✦','◆','●','▲','☾','✿','⬢','★'];
 const LEVELS={
-  1:[0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5],
-  2:[0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5],
-  3:[0,0,0,0,0,0,1,1,1,1,1,1,2,2,2,2,2,2,3,3,3,3,3,3,4,4,4,4,4,4,5,5,5,5,5,5]
+  1:{stacks:6,cols:3},
+  2:{stacks:8,cols:4},
+  3:{stacks:12,cols:6}
 };
+
 const state={
   level:Math.min(3,Math.max(1,+localStorage.xhLevel||1)),
-  hand:[],gone:new Set(),history:[],score:+localStorage.xhScore||0,modalMode:''
+  hand:[],gone:new Set(),history:[],score:+localStorage.xhScore||0,modalMode:'',tiles:[]
 };
 const $=s=>document.querySelector(s);
-function save(){localStorage.xhLevel=state.level;localStorage.xhScore=state.score}
+
+function save(){
+  localStorage.xhLevel=state.level;
+  localStorage.xhScore=state.score;
+}
+
 function render(){
-  $('#score').textContent=state.score;$('#level').textContent=state.level;
+  $('#score').textContent=state.score;
+  $('#level').textContent=state.level;
   $('#diff').textContent=['','入门','深思','☄️ 1% 极限'][state.level];
   $('#slots').replaceChildren(...Array.from({length:7},(_,i)=>{
-    const s=document.createElement('span');s.textContent=state.hand[i]==null?'':ICONS[state.hand[i]];return s;
+    const s=document.createElement('span');
+    s.textContent=state.hand[i]==null?'':ICONS[state.hand[i]];
+    return s;
   }));
 }
+
+function layerValues(level,layer,count){
+  const presets={
+    1:[[0,0,0,1,1,2],[1,1,1,2,2,3],[2,2,2,3,3,4]],
+    2:[[0,0,0,1,1,2,2,3],[1,1,1,2,2,3,3,4],[2,2,2,3,3,4,4,5]],
+    3:[[0,0,0,1,1,1,2,2,3,3,4,4],[1,1,1,2,2,2,3,3,4,4,5,5],[2,2,2,3,3,3,4,4,5,5,0,0]]
+  };
+  return presets[level][layer].slice(0,count);
+}
+
 function build(){
-  state.hand=[];state.gone=new Set();state.history=[];state.modalMode='';
+  const cfg=LEVELS[state.level];
+  state.hand=[];state.gone=new Set();state.history=[];state.modalMode='';state.tiles=[];
   $('#field').replaceChildren();
-  const seq=[...LEVELS[state.level]].sort(()=>Math.random()-.5),cols=6;
-  seq.forEach((v,i)=>{
-    const b=document.createElement('button');b.className='tile';b.textContent=ICONS[v];
-    b.dataset.v=v;b.dataset.id=i;b.onclick=()=>pick(b);
-    b.style.setProperty('--x',(9+(i%cols)*16.4)+'%');
-    b.style.setProperty('--y',(9+Math.floor(i/cols)*16.4)+'%');
-    $('#field').append(b);
-  });render();
-}
-function syncTiles(){document.querySelectorAll('.tile').forEach(b=>b.classList.toggle('gone',state.gone.has(+b.dataset.id)))}
-function showModal(message,mode,buttonText){
-  state.modalMode=mode;$('#modal').classList.toggle('finish',mode==='finish');$('#msg').textContent=message;$('#close').textContent=buttonText;$('#modal').showModal();
-}
-function pick(b){
-  const id=+b.dataset.id;if(state.gone.has(id))return;
-  state.history.push({hand:[...state.hand],gone:[...state.gone],score:state.score});
-  state.hand.push(+b.dataset.v);state.gone.add(id);
-  for(const v of new Set(state.hand)){
-    if(state.hand.filter(x=>x===v).length>=3){state.hand=state.hand.filter(x=>x!==v);state.score+=30}
+
+  const values=[0,1,2].flatMap(layer=>layerValues(state.level,layer,cfg.stacks));
+  const cols=cfg.cols;
+  for(let i=0;i<cfg.stacks;i++){
+    const x=9+(i%cols)*(82/(cols-1||1));
+    const y=18+Math.floor(i/cols)*64;
+    for(let layer=0;layer<3;layer++){
+      const id=layer*cfg.stacks+i;
+      const tile={id,stack:i,layer,v:values[id]};
+      state.tiles.push(tile);
+      const b=document.createElement('button');
+      b.className='tile';
+      b.textContent=ICONS[tile.v];
+      b.dataset.v=tile.v;
+      b.dataset.id=id;
+      b.dataset.stack=i;
+      b.dataset.layer=layer;
+      b.style.setProperty('--x',x+'%');
+      b.style.setProperty('--y',y+'%');
+      b.style.setProperty('--lift',(layer*3)+'px');
+      b.style.zIndex=layer+1;
+      b.onclick=()=>pick(b);
+      $('#field').append(b);
+    }
   }
-  syncTiles();render();
-  if(state.hand.length>=7){showModal('能量槽满了，本局结束。','retry','重新挑战');return}
-  if(state.gone.size===LEVELS[state.level].length){
+  syncTiles();
+  render();
+}
+
+function isAvailable(tile){
+  for(const other of state.tiles){
+    if(other.stack===tile.stack && other.layer>tile.layer && !state.gone.has(other.id))return false;
+  }
+  return true;
+}
+
+function syncTiles(){
+  document.querySelectorAll('.tile').forEach(b=>{
+    const id=+b.dataset.id;
+    const tile=state.tiles[id];
+    const gone=state.gone.has(id);
+    const available=!gone&&isAvailable(tile);
+    b.classList.toggle('gone',gone);
+    b.classList.toggle('locked',!gone&&!available);
+    b.disabled=!gone&&!available;
+  });
+}
+
+function showModal(message,mode,buttonText){
+  state.modalMode=mode;
+  $('#modal').classList.toggle('finish',mode==='finish');
+  $('#msg').textContent=message;
+  $('#close').textContent=buttonText;
+  $('#modal').showModal();
+}
+
+function pick(b){
+  const id=+b.dataset.id;
+  const tile=state.tiles[id];
+  if(state.gone.has(id)||!isAvailable(tile))return;
+
+  state.history.push({
+    hand:[...state.hand],
+    gone:[...state.gone],
+    score:state.score
+  });
+
+  state.hand.push(tile.v);
+  state.gone.add(id);
+
+  let cleared=false;
+  for(const v of new Set(state.hand)){
+    if(state.hand.filter(x=>x===v).length>=3){
+      state.hand=state.hand.filter(x=>x!==v);
+      state.score+=30;
+      cleared=true;
+    }
+  }
+
+  syncTiles();
+  render();
+
+  if(state.hand.length>=7){
+    showModal('能量槽满了，本局结束。\n观察堆叠关系，再试一次。','retry','重新挑战');
+    return;
+  }
+
+  if(state.gone.size===state.tiles.length){
     if(state.level===3){
       state.modalMode='finish';
       $('#modal').classList.add('finish');
@@ -53,27 +139,47 @@ function pick(b){
       save();
       return;
     }
-    state.level+=1;save();
+    state.level+=1;
+    save();
     showModal('回路完成 ✦ 下一关已解锁','next','进入下一关');
+    return;
   }
+
+  if(cleared)save();
 }
+
 $('#undo').onclick=()=>{
-  const h=state.history.pop();if(!h)return;
-  state.hand=h.hand;state.gone=new Set(h.gone);state.score=h.score;syncTiles();save();render();
+  const h=state.history.pop();
+  if(!h)return;
+  state.hand=h.hand;
+  state.gone=new Set(h.gone);
+  state.score=h.score;
+  syncTiles();
+  save();
+  render();
 };
-$('#restart').onclick=()=>{build();$('#modal').close()};
+
+$('#restart').onclick=()=>{
+  build();
+  $('#modal').close();
+};
+
 $('#close').onclick=()=>{
-  const mode=state.modalMode;$('#modal').close();
-  if(mode==='next')build();
-  else if(mode==='retry')build();
+  const mode=state.modalMode;
+  $('#modal').close();
+  if(mode==='next'||mode==='retry')build();
   else if(mode==='finish'){
     $('#msg').textContent='🏆 通关成功！\n你已经完成全部 3 个回路。';
     $('#close').textContent='重新开始';
     state.modalMode='finished';
     $('#modal').showModal();
-  } else if(mode==='finished'){
+  }else if(mode==='finished'){
     $('#modal').classList.remove('finish');
-    state.level=1;state.score=0;save();build();
+    state.level=1;
+    state.score=0;
+    save();
+    build();
   }
 };
+
 build();
