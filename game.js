@@ -40,6 +40,7 @@ function setLocale(locale){
   $('#share').setAttribute('aria-label',t('share'));$('#undo').setAttribute('aria-label',t('undo'));$('#restart').setAttribute('aria-label',t('restart'));
   document.querySelector('.stats').childNodes[0].textContent=t('score')+' ';
   $('#close').textContent=t('continue');
+  $('#modal').setAttribute('data-finish-title',currentLang==='zh'?'✦ 终极回路 · 通关成功 ✦':'✦ Ultimate Circuit · Complete ✦');
   render();
 }
 window.XingchenHuilu={setLocale};
