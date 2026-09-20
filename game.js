@@ -31,7 +31,7 @@ function setLocale(locale){
   $('#diff').textContent=t('level')[state.level];
   $('#hint').textContent=t('hint');
   document.querySelector('.bar span:first-child').innerHTML=t('route')+' <b id="level">'+state.level+'</b>/3';
-  document.querySelector('.bar span:nth-child(1)').parentElement.nextElementSibling.textContent=t('energy');
+  document.querySelectorAll('.bar')[1].firstElementChild.textContent=t('energy');
   $('#share').textContent=t('share');$('#undo').textContent=t('undo');$('#restart').textContent=t('restart');
   $('#share').setAttribute('aria-label',t('share'));$('#undo').setAttribute('aria-label',t('undo'));$('#restart').setAttribute('aria-label',t('restart'));
   document.querySelector('.stats').childNodes[0].textContent=t('score')+' ';
