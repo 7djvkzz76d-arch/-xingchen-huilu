@@ -90,6 +90,23 @@ function syncTiles(){
   });
 }
 
+function shareResult(){
+  const text=state.level===3&&state.modalMode==='finish'
+    ? '我完成了《星屑回路》全部 3 个回路 ✦'
+    : '我正在挑战《星屑回路》，当前完成到第 '+state.level+' 关 ✦';
+  if(navigator.share){
+    navigator.share({title:'星屑回路',text,url:location.href}).catch(()=>{});
+    return;
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text+' '+location.href).then(()=>{
+      const old=$('#share').textContent;
+      $('#share').textContent='✓ 已复制';
+      setTimeout(()=>$('#share').textContent=old,1400);
+    }).catch(()=>{});
+  }
+}
+
 function showModal(message,mode,buttonText){
   state.modalMode=mode;
   $('#modal').classList.toggle('finish',mode==='finish');
@@ -147,6 +164,8 @@ function pick(b){
 
   if(cleared)save();
 }
+
+$('#share').onclick=shareResult;
 
 $('#undo').onclick=()=>{
   const h=state.history.pop();
