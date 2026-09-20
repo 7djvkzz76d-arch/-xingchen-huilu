@@ -29,6 +29,10 @@ function setLocale(locale){
   currentLang=/^zh(?:-|$)/i.test(locale||'')?'zh':'en';
   document.documentElement.lang=currentLang==='zh'?'zh-CN':'en';
   $('#diff').textContent=t('level')[state.level];
+  $('.brand').innerHTML=currentLang==='zh'?'✦ 星屑<i>回路</i>':'✦ Star Dust <i>Circuit</i>';
+  document.querySelector('.foot').textContent=currentLang==='zh'?'原创三消益智玩法 · 第3关为极限难度目标':'Original match-3 puzzle · Circuit 3 is the extreme challenge';
+  $('#field').setAttribute('aria-label',currentLang==='zh'?'星屑回路棋盘':'Star Dust Circuit board');
+  $('#slots').setAttribute('aria-label',currentLang==='zh'?'能量槽':'Energy slots');
   $('#hint').textContent=t('hint');
   document.querySelector('.bar span:first-child').innerHTML=t('route')+' <b id="level">'+state.level+'</b>/3';
   document.querySelectorAll('.bar')[1].firstElementChild.textContent=t('energy');
@@ -121,7 +125,7 @@ function syncTiles(){
 function shareResult(){
   const completed=state.modalMode==='finish'||state.modalMode==='finished';
   const text=completed?t('shareFinish'):t('shareProgress')(state.level);
-  if(navigator.share){navigator.share({title:'星屑回路',text,url:location.href}).catch(()=>{});return}
+  if(navigator.share){navigator.share({title:currentLang==='zh'?'星屑回路':'Star Dust Circuit',text,url:location.href}).catch(()=>{});return}
   if(navigator.clipboard&&navigator.clipboard.writeText){
     navigator.clipboard.writeText(text+' '+location.href).then(()=>{
       const old=$('#share').textContent;$('#share').textContent=t('shareDone');setTimeout(()=>$('#share').textContent=old,1400);
