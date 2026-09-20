@@ -28,3 +28,5 @@ Import the repository into Vercel as a static project. No build command is requi
 ## Production deployment
 
 The Vercel project is connected to this repository. Production deployments should be triggered by pushes to `main`.
+
+<!-- production trigger -->
