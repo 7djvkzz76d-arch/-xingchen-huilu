@@ -1,5 +1,12 @@
 'use strict';
 
+// Safari/private-mode/webview-safe persistence. Gameplay must never fail just because storage is unavailable.
+const storage={
+  get(key,fallback){try{const v=localStorage.getItem(key);return v===null?fallback:v}catch{return fallback}},
+  set(key,value){try{localStorage.setItem(key,String(value))}catch{}},
+};
+const num=(key,fallback,min,max)=>{const n=Number(storage.get(key,fallback));return Number.isFinite(n)?Math.min(max,Math.max(min,n)):fallback};
+
 const ICONS=['✦','◆','●','▲','☾','✿','⬢','★'];
 const LEVELS={
   1:{stacks:6,cols:3},
@@ -8,14 +15,14 @@ const LEVELS={
 };
 
 const state={
-  level:Math.min(3,Math.max(1,+localStorage.xhLevel||1)),
-  hand:[],gone:new Set(),history:[],score:+localStorage.xhScore||0,modalMode:'',tiles:[]
+  level:num('xhLevel',1,1,3),
+  hand:[],gone:new Set(),history:[],score:num('xhScore',0,0,Number.MAX_SAFE_INTEGER),modalMode:'',tiles:[]
 };
 const $=s=>document.querySelector(s);
 
 function save(){
-  localStorage.xhLevel=state.level;
-  localStorage.xhScore=state.score;
+  storage.set('xhLevel',state.level);
+  storage.set('xhScore',state.score);
 }
 
 function render(){
