@@ -32,7 +32,7 @@ function build(){
 }
 function syncTiles(){document.querySelectorAll('.tile').forEach(b=>b.classList.toggle('gone',state.gone.has(+b.dataset.id)))}
 function showModal(message,mode,buttonText){
-  state.modalMode=mode;$('#msg').textContent=message;$('#close').textContent=buttonText;$('#modal').showModal();
+  state.modalMode=mode;$('#modal').classList.toggle('finish',mode==='finish');$('#msg').textContent=message;$('#close').textContent=buttonText;$('#modal').showModal();
 }
 function pick(b){
   const id=+b.dataset.id;if(state.gone.has(id))return;
@@ -46,6 +46,7 @@ function pick(b){
   if(state.gone.size===LEVELS[state.level].length){
     if(state.level===3){
       state.modalMode='finish';
+      $('#modal').classList.add('finish');
       $('#msg').textContent='恭喜你！你完成了《星屑回路》的终极挑战 ✦';
       $('#close').textContent='查看结果';
       $('#modal').showModal();
@@ -71,6 +72,7 @@ $('#close').onclick=()=>{
     state.modalMode='finished';
     $('#modal').showModal();
   } else if(mode==='finished'){
+    $('#modal').classList.remove('finish');
     state.level=1;state.score=0;save();build();
   }
 };
