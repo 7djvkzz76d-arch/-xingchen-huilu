@@ -1,0 +1,10 @@
+{
+  "name":"星屑回路",
+  "short_name":"星屑回路",
+  "start_url":".",
+  "display":"standalone",
+  "background_color":"#050b15",
+  "theme_color":"#07111f",
+  "lang":"zh-CN",
+  "description":"原创三消益智挑战，三关制，第3关为终极难度。"
+}
