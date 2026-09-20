@@ -7,6 +7,38 @@ const storage={
 const num=(key,fallback,min,max)=>{const n=Number(storage.get(key,fallback));return Number.isFinite(n)?Math.min(max,Math.max(min,n)):fallback};
 
 const ICONS=['✦','◆','●','▲','☾','✿','⬢','★'];
+const TEXT={
+  zh:{level:['','入门','深思','☄️ 1% 极限'],hint:'可点击发光星块',energy:'能量槽 · 三颗同星坍缩',share:'↗ 分享战绩',undo:'↩ 撤回',restart:'↻ 重开',retry:'重新挑战',next:'进入下一关',continue:'继续',score:'分数',route:'回路',shareDone:'✓ 已复制',
+    shareProgress:l=>'我正在挑战《星屑回路》，当前完成到第 '+l+' 关 ✦',
+    shareFinish:'我完成了《星屑回路》全部 3 个回路 ✦',
+    full:'能量槽满了，本局结束。\\n观察堆叠关系，再试一次。',
+    nextMsg:'回路完成 ✦ 下一关已解锁',
+    finishMsg:'恭喜你！你完成了《星屑回路》的终极挑战 ✦',
+    successMsg:'🏆 通关成功！\\n你已经完成全部 3 个回路。'},
+  en:{level:['','Beginner','Think Deep','☄️ 1% Extreme'],hint:'Tap a glowing star tile',energy:'Energy · Three matching stars collapse',share:'↗ Share Result',undo:'↩ Undo',restart:'↻ Restart',retry:'Try Again',next:'Next Level',continue:'Continue',score:'Score',route:'Circuit',shareDone:'✓ Copied',
+    shareProgress:l=>'I\'m challenging Star Dust Circuit — reached Circuit '+l+' ✦',
+    shareFinish:'I completed all 3 circuits in Star Dust Circuit ✦',
+    full:'Energy is full.\\nStudy the stack and try again.',
+    nextMsg:'Circuit complete ✦ Next level unlocked',
+    finishMsg:'Congratulations! You completed the ultimate Star Dust Circuit ✦',
+    successMsg:'🏆 Complete!\\nYou finished all 3 circuits.'}
+};
+let currentLang=/^zh(?:-|$)/i.test(navigator.language||'')?'zh':'en';
+const t=key=>TEXT[currentLang][key];
+function setLocale(locale){
+  currentLang=/^zh(?:-|$)/i.test(locale||'')?'zh':'en';
+  document.documentElement.lang=currentLang==='zh'?'zh-CN':'en';
+  $('#diff').textContent=t('level')[state.level];
+  $('#hint').textContent=t('hint');
+  document.querySelector('.bar span:first-child').innerHTML=t('route')+' <b id="level">'+state.level+'</b>/3';
+  document.querySelector('.bar span:nth-child(1)').parentElement.nextElementSibling.textContent=t('energy');
+  $('#share').textContent=t('share');$('#undo').textContent=t('undo');$('#restart').textContent=t('restart');
+  $('#share').setAttribute('aria-label',t('share'));$('#undo').setAttribute('aria-label',t('undo'));$('#restart').setAttribute('aria-label',t('restart'));
+  document.querySelector('.stats').childNodes[0].textContent=t('score')+' ';
+  $('#close').textContent=t('continue');
+  render();
+}
+window.XingchenHuilu={setLocale};
 const LEVELS={
   1:{stacks:6,cols:3},
   2:{stacks:8,cols:4},
@@ -23,7 +55,8 @@ function save(){storage.set('xhLevel',state.level);storage.set('xhScore',state.s
 function render(){
   $('#score').textContent=state.score;
   $('#level').textContent=state.level;
-  $('#diff').textContent=['','入门','深思','☄️ 1% 极限'][state.level];
+  $('#diff').textContent=t('level')[state.level];
+  $('#hint').textContent=t('hint');
   $('#slots').replaceChildren(...Array.from({length:7},(_,i)=>{
     const s=document.createElement('span');s.textContent=state.hand[i]==null?'':ICONS[state.hand[i]];return s;
   }));
@@ -87,11 +120,11 @@ function syncTiles(){
 
 function shareResult(){
   const completed=state.modalMode==='finish'||state.modalMode==='finished';
-  const text=completed?'我完成了《星屑回路》全部 3 个回路 ✦':'我正在挑战《星屑回路》，当前完成到第 '+state.level+' 关 ✦';
+  const text=completed?t('shareFinish'):t('shareProgress')(state.level);
   if(navigator.share){navigator.share({title:'星屑回路',text,url:location.href}).catch(()=>{});return}
   if(navigator.clipboard&&navigator.clipboard.writeText){
     navigator.clipboard.writeText(text+' '+location.href).then(()=>{
-      const old=$('#share').textContent;$('#share').textContent='✓ 已复制';setTimeout(()=>$('#share').textContent=old,1400);
+      const old=$('#share').textContent;$('#share').textContent=t('shareDone');setTimeout(()=>$('#share').textContent=old,1400);
     }).catch(()=>{});
   }
 }
@@ -121,10 +154,10 @@ function pick(b){
   if(state.gone.size===state.tiles.length){
     if(state.level===3){
       state.modalMode='finish';$('#modal').classList.add('finish');
-      $('#msg').textContent='恭喜你！你完成了《星屑回路》的终极挑战 ✦';
-      $('#close').textContent='查看结果';$('#modal').showModal();save();return;
+      $('#msg').textContent=t('finishMsg');
+      $('#close').textContent=t('continue');$('#modal').showModal();save();return;
     }
-    state.level+=1;save();showModal('回路完成 ✦ 下一关已解锁','next','进入下一关');return;
+    state.level+=1;save();showModal(t('nextMsg'),'next',t('next'));return;
   }
   if(cleared)save();
 }
