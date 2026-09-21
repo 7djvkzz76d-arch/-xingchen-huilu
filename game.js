@@ -55,6 +55,31 @@ const state={
 };
 const $=s=>document.querySelector(s);
 
+const crazyGames={
+  enabled:false,
+  async init(){
+    try{
+      if(!window.CrazyGames?.SDK)return;
+      const env=await window.CrazyGames.SDK.getEnvironment();
+      this.enabled=env==='crazygames';
+      if(this.enabled) window.CrazyGames.SDK.game.gameplayStart();
+    }catch{}
+  },
+  gameplayStop(){try{if(this.enabled)window.CrazyGames.SDK.game.gameplayStop()}catch{}},
+  gameplayStart(){try{if(this.enabled)window.CrazyGames.SDK.game.gameplayStart()}catch{}},
+  midgameAd(done){
+    if(!this.enabled){done?.();return}
+    this.gameplayStop();
+    try{
+      window.CrazyGames.SDK.ad.requestAd('midgame',{
+        adStarted:()=>this.gameplayStop(),
+        adFinished:()=>{this.gameplayStart();done?.()},
+        adError:()=>{this.gameplayStart();done?.()}
+      });
+    }catch{this.gameplayStart();done?.()}
+  }
+};
+
 function save(){storage.set('xhLevel',state.level);storage.set('xhScore',state.score)}
 
 function render(){
@@ -79,6 +104,7 @@ function layerValues(level,layer,count){
 function build(){
   const cfg=LEVELS[state.level];
   state.hand=[];state.gone=new Set();state.history=[];state.modalMode='';state.tiles=[];
+  crazyGames.gameplayStart();
   $('#field').replaceChildren();
   const values=[0,1,2].flatMap(layer=>layerValues(state.level,layer,cfg.stacks));
   const cols=cfg.cols,rows=Math.ceil(cfg.stacks/cols);
@@ -162,7 +188,7 @@ function pick(b){
       $('#msg').textContent=t('finishMsg');
       $('#close').textContent=t('continue');$('#modal').showModal();save();return;
     }
-    state.level+=1;save();showModal(t('nextMsg'),'next',t('next'));return;
+    state.level+=1;save();crazyGames.midgameAd(()=>showModal(t('nextMsg'),'next',t('next')));return;
   }
   if(cleared)save();
 }
@@ -177,6 +203,7 @@ $('#restart').onclick=()=>{build();if($('#modal').open)$('#modal').close()};
 $('#close').onclick=()=>{
   const mode=state.modalMode;$('#modal').close();
   if(mode==='next'||mode==='retry')build();
+crazyGames.init();
   else if(mode==='finish'){
     $('#msg').textContent='🏆 通关成功！\n你已经完成全部 3 个回路。';
     $('#close').textContent='重新开始';state.modalMode='finished';$('#modal').showModal();
