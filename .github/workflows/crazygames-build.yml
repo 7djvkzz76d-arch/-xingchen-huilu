@@ -1,0 +1,31 @@
+name: CrazyGames Build
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Assemble CrazyGames upload package
+        run: |
+          rm -rf dist/crazygames
+          mkdir -p dist/crazygames
+          cp game.js dist/crazygames/game.js
+          sed 's#../../game.js#game.js#' platforms/crazygames/index.html > dist/crazygames/index.html
+          test -s dist/crazygames/index.html
+          test -s dist/crazygames/game.js
+          node --check dist/crazygames/game.js
+          test "$(grep -o 'sdk.crazygames.com/crazygames-sdk-v3.js' dist/crazygames/index.html | wc -l)" = "1"
+          test "$(grep -o 'gameplayStart' dist/crazygames/index.html | wc -l)" = "1"
+      - name: Upload CrazyGames package
+        uses: actions/upload-artifact@v4
+        with:
+          name: xingchen-huilu-crazygames-build
+          path: dist/crazygames
+          if-no-files-found: error
+          retention-days: 14
