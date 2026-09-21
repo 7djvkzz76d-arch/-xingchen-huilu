@@ -4,9 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<meta name="description" content="星屑回路：原创三消益智挑战，三关制，第3关为终极难度。">
+<meta name="description" content="星屑回路：免费在线三消益智游戏。7格能量槽、三颗同星坍缩，3个原创关卡，支持手机和桌面浏览器。">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://xingchenhuiluv15final.vercel.app/">
 <link rel="manifest" href="manifest.webmanifest">
-<title>星屑回路</title>
+<title>星屑回路｜免费在线三消益智游戏</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;background:#050b15;color:#e8f3ff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
@@ -56,6 +58,7 @@ dialog.finish::before{content:attr(data-finish-title);display:block;font-size:13
   <div class="brand">✦ 星屑<i>回路</i></div>
   <div class="stats">分数 <b id="score">0</b></div>
 </header>
+<nav style="display:flex;gap:12px;justify-content:center;font-size:12px;margin-bottom:2px"><a href="about.html" style="color:#9fc7ee">玩法</a><a href="privacy.html" style="color:#9fc7ee">隐私</a><a href="terms.html" style="color:#9fc7ee">条款</a></nav>
 <section class="board">
   <div class="bar"><span>回路 <b id="level">1</b>/3</span><b id="diff">入门</b></div>
   <div id="field" class="field" aria-label="星屑回路棋盘"></div>
@@ -70,6 +73,7 @@ dialog.finish::before{content:attr(data-finish-title);display:block;font-size:13
 <div class="foot">原创三消益智玩法 · 第3关为极限难度目标</div>
 </main>
 <dialog id="modal" aria-labelledby="msg"><p id="msg"></p><button id="close" type="button">继续</button></dialog>
+<script src="https://sdk.crazygames.com/crazygames-sdk-v2.js"></script>
 <script src="game.js"></script>
 </body>
 </html>
