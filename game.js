@@ -203,7 +203,6 @@ $('#restart').onclick=()=>{build();if($('#modal').open)$('#modal').close()};
 $('#close').onclick=()=>{
   const mode=state.modalMode;$('#modal').close();
   if(mode==='next'||mode==='retry')build();
-crazyGames.init();
   else if(mode==='finish'){
     $('#msg').textContent='🏆 通关成功！\n你已经完成全部 3 个回路。';
     $('#close').textContent='重新开始';state.modalMode='finished';$('#modal').showModal();
@@ -212,3 +211,4 @@ crazyGames.init();
   }
 };
 build();
+crazyGames.init();
