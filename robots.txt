@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://xingchenhuiluv15final.vercel.app/sitemap.xml
